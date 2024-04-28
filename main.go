@@ -3,7 +3,12 @@ package main
 import (
 	"net/http"
 
+	"example/todo-go-api/database"
+	"example/todo-go-api/model"
+	"log"
+
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type todo struct {
@@ -19,12 +24,27 @@ var todos = []todo{
 }
 
 func main() {
+	loadEnv()
+	loadDatabase()
+
 	router := gin.Default()
 	router.GET("/todos", getTodos)
 	router.POST("/todos", createTodo)
 	router.PUT("/todos/:id", updateTodo)
 	// router.DELETE("/todos/:id", deleteTodo)
 	router.Run("localhost:8080")
+}
+
+func loadEnv() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
+
+func loadDatabase() {
+	database.Connect()
+	database.DB.AutoMigrate(&model.Todo{})
 }
 
 func getTodos(c *gin.Context) {
